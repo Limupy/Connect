@@ -128,7 +128,9 @@ public final class ClientEvents {
     private static void decorateLimuServer(ServerData server) {
         server.name = SERVER_NAME;
         server.setIconBytes(LIMU_ICON.clone());
-        server.motd = Component.literal("");
+        server.motd = Component.literal(CURRENT_SERVER_ADDRESS.isBlank()
+                ? "Получение адреса сервера…"
+                : "Адрес: " + CURRENT_SERVER_ADDRESS);
         server.version = Component.literal("Minecraft 1.21.1");
         server.status = Component.literal(
                 DIRECTORY_CONNECTED ? "Сервер доступен" :
