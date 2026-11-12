@@ -19,6 +19,8 @@ import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -195,6 +197,58 @@ public final class ClientEvents {
         } catch (ReflectiveOperationException | RuntimeException error) {
             LOGGER.debug("[Limu Connect] Could not update vanilla row status icon", error);
         }
+    }
+
+    /*
+     * e4steam requires the Steam desktop client on Windows. When a Limu join
+     * ends on Minecraft's disconnect screen, check for steam.exe in the
+     * background. Only show a hint when the current server is our Limu entry
+     * and Steam is positively confirmed absent; never interfere with other
+     * servers or replace the vanilla disconnect screen.
+     */
+    @SubscribeEvent
+    public static void onDisconnectedScreenOpening(ScreenEvent.Opening event) {
+        if (!(event.getNewScreen() instanceof DisconnectedScreen disconnected)) {
+            return;
+        }
+
+        Minecraft minecraft = Minecraft.getInstance();
+        ServerData currentServer = minecraft.getCurrentServer();
+        if (currentServer == null || !SERVER_NAME.equals(currentServer.name)) {
+            return;
+        }
+        if (!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win")) {
+            return;
+        }
+
+        java.util.concurrent.CompletableFuture
+                .supplyAsync(ClientEvents::isSteamRunning)
+                .whenComplete((steamRunning, error) -> minecraft.execute(() -> {
+                    if (error != null || !Boolean.FALSE.equals(steamRunning)
+                            || minecraft.screen != disconnected) {
+                        return;
+                    }
+
+                    minecraft.setScreen(new ConfirmScreen(
+                            ignored -> minecraft.setScreen(disconnected),
+                            Component.literal("Steam не запущен"),
+                            Component.literal(
+                                    "Для подключения к Limu через e4steam необходимо запустить Steam. "
+                                            + "Откройте Steam, дождитесь входа в аккаунт и повторите подключение."
+                            ),
+                            Component.literal("Понятно"),
+                            Component.literal("Назад")
+                    ));
+                }));
+    }
+
+    private static boolean isSteamRunning() {
+        return ProcessHandle.allProcesses().anyMatch(process -> {
+            ProcessHandle.Info info = process.info();
+            String command = info.command().orElseGet(() -> info.commandLine().orElse(""));
+            String normalized = command.toLowerCase(Locale.ROOT).replace('/', '\\\\');
+            return normalized.equals("steam.exe") || normalized.endsWith("\\\\steam.exe");
+        });
     }
 
     @SubscribeEvent
