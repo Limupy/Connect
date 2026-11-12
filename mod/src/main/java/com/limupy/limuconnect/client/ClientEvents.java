@@ -19,7 +19,9 @@ import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.network.chat.Component;
@@ -251,14 +253,47 @@ public final class ClientEvents {
                                 + "Если ошибка повторяется, проверьте, что Steam не блокируется брандмауэром или VPN.";
                     }
 
-                    minecraft.setScreen(new ConfirmScreen(
-                            ignored -> minecraft.setScreen(disconnected),
-                            Component.literal(title),
-                            Component.literal(message),
-                            Component.literal("Понятно"),
-                            Component.literal("Назад")
+                    minecraft.setScreen(new LimuConnectionErrorScreen(
+                            title,
+                            message,
+                            disconnected
                     ));
                 }));
+    }
+
+
+    private static final class LimuConnectionErrorScreen extends Screen {
+        private final String message;
+        private final Screen returnScreen;
+
+        private LimuConnectionErrorScreen(String title, String message, Screen returnScreen) {
+            super(Component.literal(title));
+            this.message = message;
+            this.returnScreen = returnScreen;
+        }
+
+        @Override
+        protected void init() {
+            int buttonWidth = 120;
+            int buttonHeight = 20;
+            addRenderableWidget(Button.builder(
+                    Component.literal("Понятно"),
+                    button -> Minecraft.getInstance().setScreen(returnScreen)
+            ).bounds((width - buttonWidth) / 2, height - 40, buttonWidth, buttonHeight).build());
+        }
+
+        @Override
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            renderBackground(graphics, mouseX, mouseY, partialTick);
+            graphics.drawCenteredString(font, title, width / 2, height / 2 - 54, 0xFFFFFF);
+            var lines = font.split(Component.literal(message), Math.max(200, width - 80));
+            int y = height / 2 - 24;
+            for (var line : lines) {
+                graphics.drawCenteredString(font, line, width / 2, y, 0xD0D0D0);
+                y += font.lineHeight + 3;
+            }
+            super.render(graphics, mouseX, mouseY, partialTick);
+        }
     }
 
     private static boolean isSteamRunning() {
