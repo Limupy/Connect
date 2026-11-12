@@ -43,6 +43,9 @@ public final class ClientEvents {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String SERVER_NAME = "LimuServer";
     private static final String LEGACY_SERVER_NAME = "Limu Minecraft";
+    // Minecraft may clear getCurrentServer() before DisconnectedScreen opens.
+    // Remember the actual selected Limu row until the connection attempt ends.
+    private static volatile boolean LIMU_CONNECTION_ATTEMPT = false;
     private static final byte[] LIMU_ICON = Base64.getDecoder().decode(
             "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAeElEQVR42u3aoREAIAwEQWQqSP9NRsPQAQy4rLiXEaszMnN2buyJiJYBAAAAAAAAAAAAAADg7VBVHQcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADoA/A4AAAAAAAAAAAAAAJ+iAAAAAAAAAAAA9wCdW3hJ4lrWB7gTAAAAAElFTkSuQmCC"
     );
@@ -213,7 +216,10 @@ public final class ClientEvents {
 
         Minecraft minecraft = Minecraft.getInstance();
         ServerData currentServer = minecraft.getCurrentServer();
-        if (currentServer == null || !isLimuEntry(currentServer)) {
+        boolean limuAttempt = LIMU_CONNECTION_ATTEMPT
+                || (currentServer != null && isLimuEntry(currentServer));
+        LIMU_CONNECTION_ATTEMPT = false;
+        if (!limuAttempt) {
             return;
         }
         if (!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win")) {
@@ -294,6 +300,19 @@ public final class ClientEvents {
         if (event.getButton() != 0 || !(event.getScreen() instanceof JoinMultiplayerScreen screen)) return;
         double mouseX = event.getMouseX();
         double mouseY = event.getMouseY();
+        // Capture the server row before vanilla starts connecting. On a failed
+        // P2P join, Minecraft can clear currentServer before the disconnect UI.
+        for (GuiEventListener child : screen.children()) {
+            if (child instanceof ServerSelectionList list) {
+                for (ServerSelectionList.Entry entry : list.children()) {
+                    if (entry instanceof ServerSelectionList.OnlineServerEntry row
+                            && row.isMouseOver(mouseX, mouseY)
+                            && isLimuEntry(row.getServerData())) {
+                        LIMU_CONNECTION_ATTEMPT = true;
+                    }
+                }
+            }
+        }
         for (GuiEventListener child : screen.children()) {
             if (!(child instanceof AbstractButton button)) continue;
             if (mouseX < button.getX() || mouseX >= button.getX() + button.getWidth()
