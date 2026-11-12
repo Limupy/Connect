@@ -289,7 +289,7 @@ public final class ClientEvents {
             var lines = font.split(Component.literal(message), Math.max(200, width - 80));
             int y = height / 2 - 24;
             for (var line : lines) {
-                graphics.drawCenteredString(font, line, width / 2, y, 0xD0D0D0);
+                graphics.drawCenteredString(font, line, width / 2, y, 0xFFFFFF);
                 y += font.lineHeight + 3;
             }
             super.render(graphics, mouseX, mouseY, partialTick);
