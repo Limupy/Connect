@@ -49,8 +49,7 @@ public final class ClientEvents {
      * Last verified address is only a bootstrap fallback. Once the public
      * directory responds, the current address replaces it automatically.
      */
-    private static final String FALLBACK_SERVER_ADDRESS = "d-op3qnbmifbm-1.steam";
-    private static volatile String CURRENT_SERVER_ADDRESS = FALLBACK_SERVER_ADDRESS;
+    private static volatile String CURRENT_SERVER_ADDRESS = "";
     private static volatile boolean DIRECTORY_CONNECTED = false;
     private static volatile boolean DIRECTORY_CHECKED = false;
     private static volatile boolean DIRECTORY_CONFIRMED_OFFLINE = false;
@@ -69,7 +68,7 @@ public final class ClientEvents {
             Pattern.CASE_INSENSITIVE
     );
     private static final HttpClient HTTP = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
+            .connectTimeout(Duration.ofSeconds(3))
             .followRedirects(HttpClient.Redirect.NORMAL)
             .build();
 
@@ -79,7 +78,7 @@ public final class ClientEvents {
      */
     private static final Set<JoinMultiplayerScreen> REFRESHED_SCREENS =
             Collections.newSetFromMap(new WeakHashMap<>());
-    private static final long DIRECTORY_POLL_INTERVAL_MS = 10_000L;
+    private static final long DIRECTORY_POLL_INTERVAL_MS = 3_000L;
     private static final AtomicBoolean DIRECTORY_REQUEST_IN_FLIGHT = new AtomicBoolean(false);
     private static volatile long LAST_DIRECTORY_REQUEST_MS = 0L;
 
@@ -129,7 +128,9 @@ public final class ClientEvents {
     private static void decorateLimuServer(ServerData server) {
         server.name = SERVER_NAME;
         server.setIconBytes(LIMU_ICON.clone());
-        server.motd = Component.literal("Адрес e4steam: " + CURRENT_SERVER_ADDRESS);
+        server.motd = Component.literal(CURRENT_SERVER_ADDRESS.isBlank()
+                ? "Получение адреса сервера…"
+                : "Адрес e4steam: " + CURRENT_SERVER_ADDRESS);
         server.version = Component.literal("Limu Connect · e4steam P2P");
         server.status = Component.literal(
                 DIRECTORY_CONNECTED ? "e4steam подтвердил подключение" :
@@ -231,8 +232,8 @@ public final class ClientEvents {
             if (mouseX < button.getX() || mouseX >= button.getX() + button.getWidth()
                     || mouseY < button.getY() || mouseY >= button.getY() + button.getHeight()) continue;
             String label = button.getMessage().getString().toLowerCase(Locale.ROOT);
-            if (label.equals("refresh") || label.equals("обновить") || label.equals("aktualisieren")
-                    || label.equals("actualizar") || label.equals("rafraîchir")) {
+            if (label.contains("refresh") || label.contains("обновить") || label.contains("aktualisieren")
+                    || label.contains("actualizar") || label.contains("rafraîchir")) {
                 requestDirectoryRefresh(screen);
                 return;
             }
@@ -255,11 +256,11 @@ public final class ClientEvents {
         // A per-request query token forces a fresh read after the address rotates.
         URI freshStatusUri = URI.create(STATUS_URI.toString() + "?nocache=" + System.currentTimeMillis());
         HttpRequest request = HttpRequest.newBuilder(freshStatusUri)
-                .timeout(Duration.ofSeconds(8))
+                .timeout(Duration.ofSeconds(5))
                 .header("Accept", "application/json")
                 .header("Cache-Control", "no-cache, no-store")
                 .header("Pragma", "no-cache")
-                .header("User-Agent", "LimuConnect/1.1.7 Minecraft/1.21.1")
+                .header("User-Agent", "LimuConnect/1.1.9 Minecraft/1.21.1")
                 .GET()
                 .build();
 
@@ -314,7 +315,7 @@ public final class ClientEvents {
         if (retained == null) {
             retained = new ServerData(
                     SERVER_NAME,
-                    FALLBACK_SERVER_ADDRESS,
+                    "",
                     ServerData.Type.OTHER
             );
             servers.add(retained, false);
@@ -389,9 +390,16 @@ public final class ClientEvents {
                 return null;
             }
 
-            Instant updated = Instant.parse(timestamp);
-            long ageSeconds = Duration.between(updated, Instant.now()).toSeconds();
-            boolean fresh = ageSeconds >= -600 && ageSeconds <= 900;
+            boolean fresh = false;
+            if (!timestamp.isBlank()) {
+                try {
+                    Instant updated = Instant.parse(timestamp);
+                    long ageSeconds = Duration.between(updated, Instant.now()).toSeconds();
+                    fresh = ageSeconds >= -600 && ageSeconds <= 900;
+                } catch (Exception ignored) {
+                    // A valid address is still usable when the heartbeat is malformed.
+                }
+            }
             boolean serverRunning = getBoolean(object, "server_running", true);
             boolean transportConnected = getBoolean(object, "connected", false);
             boolean connected = fresh
