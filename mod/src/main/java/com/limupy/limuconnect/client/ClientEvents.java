@@ -200,11 +200,10 @@ public final class ClientEvents {
     }
 
     /*
-     * e4steam requires the Steam desktop client on Windows. When a Limu join
-     * ends on Minecraft's disconnect screen, check for steam.exe in the
-     * background. Only show a hint when the current server is our Limu entry
-     * and Steam is positively confirmed absent; never interfere with other
-     * servers or replace the vanilla disconnect screen.
+     * e4steam connects through the Steam desktop client. Always explain a
+     * failed Limu connection on Windows: checking only for a positively absent
+     * steam.exe hid the hint whenever Steam was running but its P2P session
+     * failed for another reason.
      */
     @SubscribeEvent
     public static void onDisconnectedScreenOpening(ScreenEvent.Opening event) {
@@ -214,7 +213,7 @@ public final class ClientEvents {
 
         Minecraft minecraft = Minecraft.getInstance();
         ServerData currentServer = minecraft.getCurrentServer();
-        if (currentServer == null || !SERVER_NAME.equals(currentServer.name)) {
+        if (currentServer == null || !isLimuEntry(currentServer)) {
             return;
         }
         if (!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win")) {
@@ -224,18 +223,32 @@ public final class ClientEvents {
         java.util.concurrent.CompletableFuture
                 .supplyAsync(ClientEvents::isSteamRunning)
                 .whenComplete((steamRunning, error) -> minecraft.execute(() -> {
-                    if (error != null || !Boolean.FALSE.equals(steamRunning)
-                            || minecraft.screen != disconnected) {
+                    if (minecraft.screen != disconnected) {
                         return;
+                    }
+
+                    String title;
+                    String message;
+                    if (error != null) {
+                        title = "Не удалось подключиться к Limu";
+                        message = "Limu использует Steam для P2P-подключения (e4steam). "
+                                + "Не удалось проверить состояние Steam. Запустите Steam, войдите в аккаунт "
+                                + "и попробуйте подключиться ещё раз.";
+                    } else if (Boolean.FALSE.equals(steamRunning)) {
+                        title = "Steam не запущен";
+                        message = "Для подключения к Limu через e4steam необходимо запустить Steam. "
+                                + "Откройте Steam, дождитесь входа в аккаунт и повторите подключение.";
+                    } else {
+                        title = "Ошибка подключения через Steam";
+                        message = "Steam запущен, но P2P-подключение к Limu не установлено. "
+                                + "Убедитесь, что вы вошли в Steam, перезапустите Steam и повторите попытку. "
+                                + "Если ошибка повторяется, проверьте, что Steam не блокируется брандмауэром или VPN.";
                     }
 
                     minecraft.setScreen(new ConfirmScreen(
                             ignored -> minecraft.setScreen(disconnected),
-                            Component.literal("Steam не запущен"),
-                            Component.literal(
-                                    "Для подключения к Limu через e4steam необходимо запустить Steam. "
-                                            + "Откройте Steam, дождитесь входа в аккаунт и повторите подключение."
-                            ),
+                            Component.literal(title),
+                            Component.literal(message),
                             Component.literal("Понятно"),
                             Component.literal("Назад")
                     ));
