@@ -1,0 +1,32 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="limuconnect"
+version="${version}"
+displayName="Limu Connect"
+authors="Limupy"
+description='''Limu Connect keeps the current Limu Minecraft server in the vanilla multiplayer server list and refreshes its e4steam address over HTTPS.'''
+displayTest="IGNORE_SERVER_VERSION"
+
+[[dependencies.limuconnect]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.limuconnect]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.21.2)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.limuconnect]]
+modId="e4steam"
+type="required"
+versionRange="[0.3.2,)"
+ordering="AFTER"
+side="CLIENT"
