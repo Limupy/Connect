@@ -130,12 +130,12 @@ public final class ClientEvents {
         server.setIconBytes(LIMU_ICON.clone());
         server.motd = Component.literal(CURRENT_SERVER_ADDRESS.isBlank()
                 ? "Получение адреса сервера…"
-                : "Адрес e4steam: " + CURRENT_SERVER_ADDRESS);
-        server.version = Component.literal("Limu Connect · e4steam P2P");
+                : "Адрес: " + CURRENT_SERVER_ADDRESS);
+        server.version = Component.literal("Minecraft 1.21.1");
         server.status = Component.literal(
-                DIRECTORY_CONNECTED ? "e4steam подтвердил подключение" :
-                        (DIRECTORY_CONFIRMED_OFFLINE ? "e4steam сейчас отключён" :
-                                (DIRECTORY_CHECKED ? "Статус сервера не проверен" : "Проверка e4steam…"))
+                DIRECTORY_CONNECTED ? "Сервер доступен" :
+                        (DIRECTORY_CONFIRMED_OFFLINE ? "Сервер недоступен" :
+                                (DIRECTORY_CHECKED ? "Статус не подтверждён" : "Проверка доступности…"))
         );
 
         if (DIRECTORY_CONNECTED) {
@@ -186,10 +186,10 @@ public final class ClientEvents {
                     row,
                     Component.literal(
                             connected
-                                    ? "Доступность подтверждена каталогом e4steam"
+                                    ? "Сервер доступен"
                                     : (confirmedOffline
-                                            ? "Каталог e4steam подтвердил, что транспорт отключён"
-                                            : "Статус не подтверждён; стандартный Minecraft ping для e4steam неприменим")
+                                            ? "Сервер сейчас недоступен"
+                                            : "Проверка доступности сервера")
                     )
             );
         } catch (ReflectiveOperationException | RuntimeException error) {
