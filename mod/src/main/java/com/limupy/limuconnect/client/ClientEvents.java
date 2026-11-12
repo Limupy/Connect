@@ -234,12 +234,15 @@ public final class ClientEvents {
         servers.save();
         refreshVisibleList(screen, servers);
 
-        HttpRequest request = HttpRequest.newBuilder(STATUS_URI)
+        // GitHub raw CDN may cache the JSON despite request cache headers.
+        // A per-request query token forces a fresh read after the address rotates.
+        URI freshStatusUri = URI.create(STATUS_URI.toString() + "?nocache=" + System.currentTimeMillis());
+        HttpRequest request = HttpRequest.newBuilder(freshStatusUri)
                 .timeout(Duration.ofSeconds(8))
                 .header("Accept", "application/json")
                 .header("Cache-Control", "no-cache, no-store")
                 .header("Pragma", "no-cache")
-                .header("User-Agent", "LimuConnect/1.1.6 Minecraft/1.21.1")
+                .header("User-Agent", "LimuConnect/1.1.7 Minecraft/1.21.1")
                 .GET()
                 .build();
 
@@ -260,7 +263,7 @@ public final class ClientEvents {
                         return;
                     }
                     DIRECTORY_CHECKED = true;
-                    DIRECTORY_CONNECTED = server.connected();
+                    DIRECTORY_CONNECTED = server.fresh() && server.connected();
                     DIRECTORY_CONFIRMED_OFFLINE = server.fresh() && !server.connected();
                     // Address validity and heartbeat freshness are independent.
                     // Keep the join address synchronized even when the status timestamp
@@ -356,11 +359,7 @@ public final class ClientEvents {
             JsonObject object = JsonParser.parseString(body).getAsJsonObject();
             String state = getString(object, "state", "offline");
             String address = getString(object, "address", "");
-            String timestamp = getString(
-                    object,
-                    "generated_at",
-                    getString(object, "updated_at", "")
-            );
+            // updated_at is the publisher heartbeat; generated_at may describe\n            // when the directory payload was first generated. Prefer the heartbeat.\n            String timestamp = getString(\n                    object,\n                    "updated_at",\n                    getString(object, "generated_at", "")\n            );
 
             if (!E4STEAM_ADDRESS.matcher(address).matches()) {
                 return null;
