@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.network.chat.Component;
@@ -78,6 +79,9 @@ public final class ClientEvents {
      */
     private static final Set<JoinMultiplayerScreen> REFRESHED_SCREENS =
             Collections.newSetFromMap(new WeakHashMap<>());
+    private static final long DIRECTORY_POLL_INTERVAL_MS = 10_000L;
+    private static final AtomicBoolean DIRECTORY_REQUEST_IN_FLIGHT = new AtomicBoolean(false);
+    private static volatile long LAST_DIRECTORY_REQUEST_MS = 0L;
 
     private ClientEvents() {}
 
@@ -91,6 +95,14 @@ public final class ClientEvents {
     public static void onScreenRender(ScreenEvent.Render.Pre event) {
         if (!(event.getScreen() instanceof JoinMultiplayerScreen screen)) {
             return;
+        }
+
+        // Do not depend on vanilla's localized Refresh button event: poll the
+        // directory while the multiplayer screen is open. The request guard
+        // prevents overlapping HTTP calls when rendering at 60+ FPS.
+        long now = System.currentTimeMillis();
+        if (now - LAST_DIRECTORY_REQUEST_MS >= DIRECTORY_POLL_INTERVAL_MS) {
+            requestDirectoryRefresh(screen);
         }
 
         for (GuiEventListener child : screen.children()) {
@@ -234,6 +246,11 @@ public final class ClientEvents {
         servers.save();
         refreshVisibleList(screen, servers);
 
+        if (!DIRECTORY_REQUEST_IN_FLIGHT.compareAndSet(false, true)) {
+            return;
+        }
+        LAST_DIRECTORY_REQUEST_MS = System.currentTimeMillis();
+
         // GitHub raw CDN may cache the JSON despite request cache headers.
         // A per-request query token forces a fresh read after the address rotates.
         URI freshStatusUri = URI.create(STATUS_URI.toString() + "?nocache=" + System.currentTimeMillis());
@@ -254,6 +271,7 @@ public final class ClientEvents {
                     return parseCurrentServer(response.body());
                 })
                 .whenComplete((server, error) -> minecraft.execute(() -> {
+                    DIRECTORY_REQUEST_IN_FLIGHT.set(false);
                     if (error != null || server == null) {
                         DIRECTORY_CHECKED = true;
                         DIRECTORY_CONNECTED = false;
