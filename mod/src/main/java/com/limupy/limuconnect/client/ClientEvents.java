@@ -359,7 +359,13 @@ public final class ClientEvents {
             JsonObject object = JsonParser.parseString(body).getAsJsonObject();
             String state = getString(object, "state", "offline");
             String address = getString(object, "address", "");
-            // updated_at is the publisher heartbeat; generated_at may describe\n            // when the directory payload was first generated. Prefer the heartbeat.\n            String timestamp = getString(\n                    object,\n                    "updated_at",\n                    getString(object, "generated_at", "")\n            );
+            // updated_at is the publisher heartbeat; generated_at may describe
+            // when the directory payload was first generated. Prefer the heartbeat.
+            String timestamp = getString(
+                    object,
+                    "updated_at",
+                    getString(object, "generated_at", "")
+            );
 
             if (!E4STEAM_ADDRESS.matcher(address).matches()) {
                 return null;
