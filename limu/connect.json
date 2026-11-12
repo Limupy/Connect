@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "name": "Limu Minecraft",
-  "state": "connected",
-  "connected": true,
+  "state": "starting",
+  "connected": false,
   "server_running": true,
   "address": "d-op3qqulirde-1.steam",
-  "generated_at": "2026-11-12T23:30:47Z",
-  "updated_at": "2026-11-12T23:30:47Z",
+  "generated_at": "2026-11-12T23:33:18Z",
+  "updated_at": "2026-11-12T23:33:18Z",
   "minecraft_version": "1.21.1",
   "build": "main",
-  "message": "e4steam P2P transport is accepting authenticated peers"
+  "message": "Waiting for current e4steam P2P readiness"
 }
