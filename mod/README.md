@@ -1,6 +1,6 @@
 # Limu Connect
 
-Client-side NeoForge mod for Minecraft 1.21.1.
+Client-side NeoForge mod for Minecraft 1.21.1. Current release: **1.1.7**.
 
 ## What it does
 
