@@ -246,8 +246,8 @@ public final class ClientEvents {
         return ProcessHandle.allProcesses().anyMatch(process -> {
             ProcessHandle.Info info = process.info();
             String command = info.command().orElseGet(() -> info.commandLine().orElse(""));
-            String normalized = command.toLowerCase(Locale.ROOT).replace('/', '\\\\');
-            return normalized.equals("steam.exe") || normalized.endsWith("\\\\steam.exe");
+            String normalized = command.toLowerCase(Locale.ROOT).replace('/', '\\');
+            return normalized.equals("steam.exe") || normalized.endsWith("\\steam.exe");
         });
     }
 
