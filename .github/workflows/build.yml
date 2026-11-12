@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: limu-connect-build
@@ -33,9 +33,23 @@ jobs:
         with:
           gradle-version: "9.2.1"
 
+      - name: Read mod version
+        id: mod-version
+        working-directory: mod
+        run: echo "version=$(sed -n 's/^mod_version=//p' gradle.properties)" >> "$GITHUB_OUTPUT"
+
       - name: Compile and package
         working-directory: mod
         run: gradle --no-daemon clean build
+
+      - name: Publish versioned GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.mod-version.outputs.version }}
+          name: Limu Connect ${{ steps.mod-version.outputs.version }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: mod/build/libs/LimuConnect-NeoForge-1.21.1-${{ steps.mod-version.outputs.version }}.jar
 
       - name: Upload client mod
         uses: actions/upload-artifact@v4
