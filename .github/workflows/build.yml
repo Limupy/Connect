@@ -1,0 +1,46 @@
+name: Build Limu Connect
+
+on:
+  push:
+    paths:
+      - "mod/**"
+      - ".github/workflows/build.yml"
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: limu-connect-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.2.1"
+
+      - name: Compile and package
+        working-directory: mod
+        run: gradle --no-daemon clean build
+
+      - name: Upload client mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: LimuConnect-NeoForge-1.21.1
+          path: mod/build/libs/*[!.sources].jar
+          if-no-files-found: error
+          retention-days: 30
