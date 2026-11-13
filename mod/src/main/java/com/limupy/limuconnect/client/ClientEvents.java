@@ -286,12 +286,17 @@ public final class ClientEvents {
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             renderBackground(graphics, mouseX, mouseY, partialTick);
             graphics.drawCenteredString(font, title, width / 2, height / 2 - 54, 0xFFFFFF);
-            var lines = font.split(Component.literal(message), Math.max(200, width - 80));
-            int y = height / 2 - 24;
-            for (var line : lines) {
-                graphics.drawCenteredString(font, line, width / 2, y, 0xFFFFFF);
-                y += font.lineHeight + 3;
-            }
+            // Use Minecraft's vanilla word-wrapping renderer, as in 1.2.5.
+            // The previous hand-drawn centered lines caused the message to look
+            // faint/blurred at some GUI scales.
+            graphics.drawWordWrap(
+                    font,
+                    Component.literal(message),
+                    40,
+                    height / 2 - 24,
+                    Math.max(200, width - 80),
+                    0xFFFFFF
+            );
             super.render(graphics, mouseX, mouseY, partialTick);
         }
     }
