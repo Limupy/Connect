@@ -58,7 +58,7 @@ public final class LimuServerModIndex {
         List<JarEntry> result = new ArrayList<>();
         for (Map.Entry<Path, List<IModInfo>> item : byJar.entrySet()) {
             Path jar = item.getKey();
-            Map<String, String> displayTests = readDisplayTests(jar);
+            JarMetadata metadata = readMetadata(jar);\n            Map<String, String> displayTests = metadata.displayTests();
             List<ModEntry> mods = new ArrayList<>();
             boolean anyClientRequired = false;
 
