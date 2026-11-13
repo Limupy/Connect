@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "name": "Limu Minecraft",
-  "state": "connected",
-  "connected": true,
-  "server_running": true,
+  "state": "offline",
+  "connected": false,
+  "server_running": false,
   "address": "d-op3qrsrn502-1.steam",
-  "generated_at": "2026-11-13T01:19:14Z",
-  "updated_at": "2026-11-13T01:19:14Z",
+  "generated_at": "2026-11-13T01:20:55Z",
+  "updated_at": "2026-11-13T01:20:55Z",
   "minecraft_version": "1.21.1",
   "build": "main",
-  "message": "e4steam P2P transport is accepting authenticated peers"
+  "message": "Minecraft server is offline"
 }
