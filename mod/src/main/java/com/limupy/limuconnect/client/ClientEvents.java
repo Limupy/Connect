@@ -262,17 +262,16 @@ public final class ClientEvents {
                             Component.literal("Назад")
                     ) {
                         @Override
-                        protected void init() {
+                        protected void addButtons(int y) {
                             int buttonWidth = 150;
-                            int buttonHeight = 20;
-                            addRenderableWidget(Button.builder(
+                            addExitButton(Button.builder(
                                     Component.literal("Понятно"),
                                     button -> minecraft.setScreen(disconnected)
                             ).bounds(
                                     (width - buttonWidth) / 2,
-                                    height / 2 + 9,
+                                    y,
                                     buttonWidth,
-                                    buttonHeight
+                                    20
                             ).build());
                         }
                     });
