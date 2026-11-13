@@ -22,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.neoforged.neoforge.client.gui.ModMismatchDisconnectedScreen;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -211,11 +212,37 @@ public final class ClientEvents {
      */
     @SubscribeEvent
     public static void onDisconnectedScreenOpening(ScreenEvent.Opening event) {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        // NeoForge shows this dedicated screen when the channel handshake is
+        // incompatible. Check the Limu manifest only for a failed Limu join,
+        // rather than offering downloads for ordinary network failures.
+        if (event.getNewScreen() instanceof ModMismatchDisconnectedScreen mismatchScreen) {
+            boolean limuAttempt = LIMU_CONNECTION_ATTEMPT;
+            LIMU_CONNECTION_ATTEMPT = false;
+            if (!limuAttempt) {
+                return;
+            }
+
+            LimuModSyncManager.inspect().whenComplete((plan, syncError) -> minecraft.execute(() -> {
+                if (minecraft.screen != mismatchScreen) {
+                    return;
+                }
+                if (syncError != null) {
+                    LOGGER.warn("[Limu Connect] Could not inspect required client mods", syncError);
+                    return;
+                }
+                if (plan != null && !plan.isEmpty()) {
+                    LimuModSyncScreen.showPrompt(minecraft, mismatchScreen, plan);
+                }
+            }));
+            return;
+        }
+
         if (!(event.getNewScreen() instanceof DisconnectedScreen disconnected)) {
             return;
         }
 
-        Minecraft minecraft = Minecraft.getInstance();
         ServerData currentServer = minecraft.getCurrentServer();
         boolean limuAttempt = LIMU_CONNECTION_ATTEMPT
                 || (currentServer != null && isLimuEntry(currentServer));
@@ -253,7 +280,7 @@ public final class ClientEvents {
                     }
 
                     // Keep Minecraft's original ConfirmScreen renderer from 1.2.5.
-                    // Override only init() so the dialog has one centered action.
+                    // Override only the button layout; vanilla still renders the text.
                     minecraft.setScreen(new ConfirmScreen(
                             ignored -> minecraft.setScreen(disconnected),
                             Component.literal(title),
