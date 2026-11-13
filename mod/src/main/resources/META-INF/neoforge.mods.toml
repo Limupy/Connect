@@ -5,9 +5,9 @@ license="MIT"
 [[mods]]
 modId="limuconnect"
 version="${version}"
-displayName="Limu Connect"
+displayName="Limu Connect Sync Beta"
 authors="Limupy"
-description='''Limu Connect keeps the current Limu Minecraft server in the vanilla multiplayer server list and refreshes its e4steam address over HTTPS.'''
+description='''Limu Connect Sync Beta adds verified, consent-based synchronization of client-required Limu mods. Beta builds are distributed separately from the stable Limu Connect branch.'''
 displayTest="IGNORE_SERVER_VERSION"
 
 [[dependencies.limuconnect]]
