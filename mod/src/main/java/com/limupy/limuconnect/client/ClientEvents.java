@@ -19,10 +19,9 @@ import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -253,53 +252,33 @@ public final class ClientEvents {
                                 + "Если ошибка повторяется, проверьте, что Steam не блокируется брандмауэром или VPN.";
                     }
 
-                    minecraft.setScreen(new LimuConnectionErrorScreen(
-                            title,
-                            message,
-                            disconnected
-                    ));
+                    // Keep Minecraft's original ConfirmScreen renderer from 1.2.5.
+                    // Override only init() so the dialog has one centered action.
+                    minecraft.setScreen(new ConfirmScreen(
+                            ignored -> minecraft.setScreen(disconnected),
+                            Component.literal(title),
+                            Component.literal(message),
+                            Component.literal("Понятно"),
+                            Component.literal("Назад")
+                    ) {
+                        @Override
+                        protected void init() {
+                            int buttonWidth = 150;
+                            int buttonHeight = 20;
+                            addRenderableWidget(Button.builder(
+                                    Component.literal("Понятно"),
+                                    button -> minecraft.setScreen(disconnected)
+                            ).bounds(
+                                    (width - buttonWidth) / 2,
+                                    height / 2 + 9,
+                                    buttonWidth,
+                                    buttonHeight
+                            ).build());
+                        }
+                    });
                 }));
     }
 
-
-    private static final class LimuConnectionErrorScreen extends Screen {
-        private final String message;
-        private final Screen returnScreen;
-
-        private LimuConnectionErrorScreen(String title, String message, Screen returnScreen) {
-            super(Component.literal(title));
-            this.message = message;
-            this.returnScreen = returnScreen;
-        }
-
-        @Override
-        protected void init() {
-            int buttonWidth = 120;
-            int buttonHeight = 20;
-            addRenderableWidget(Button.builder(
-                    Component.literal("Понятно"),
-                    button -> Minecraft.getInstance().setScreen(returnScreen)
-            ).bounds((width - buttonWidth) / 2, height - 40, buttonWidth, buttonHeight).build());
-        }
-
-        @Override
-        public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            renderBackground(graphics, mouseX, mouseY, partialTick);
-            graphics.drawCenteredString(font, title, width / 2, height / 2 - 54, 0xFFFFFF);
-            // Use Minecraft's vanilla word-wrapping renderer, as in 1.2.5.
-            // The previous hand-drawn centered lines caused the message to look
-            // faint/blurred at some GUI scales.
-            graphics.drawWordWrap(
-                    font,
-                    Component.literal(message),
-                    40,
-                    height / 2 - 24,
-                    Math.max(200, width - 80),
-                    0xFFFFFF
-            );
-            super.render(graphics, mouseX, mouseY, partialTick);
-        }
-    }
 
     private static boolean isSteamRunning() {
         return ProcessHandle.allProcesses().anyMatch(process -> {
