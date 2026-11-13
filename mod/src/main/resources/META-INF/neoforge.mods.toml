@@ -8,7 +8,7 @@ version="${version}"
 displayName="Limu Connect Sync Beta"
 authors="Limupy"
 description='''Limu Connect Sync Beta adds verified, consent-based synchronization of client-required Limu mods. Beta builds are distributed separately from the stable Limu Connect branch.'''
-displayTest="IGNORE_SERVER_VERSION"
+displayTest="MATCH_VERSION"
 
 [[dependencies.limuconnect]]
 modId="neoforge"
