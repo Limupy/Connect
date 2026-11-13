@@ -15,13 +15,13 @@ import net.minecraft.network.chat.Component;
  * Consent and progress UI for the Limu client mod synchronizer.
  */
 final class LimuModSyncScreen extends Screen {
-    private final DisconnectedScreen returnScreen;
+    private final Screen returnScreen;
     private final List<LimuModSyncManager.ModEntry> mods;
     private volatile String progress = "Подготовка загрузки…";
     private volatile boolean finished;
 
     private LimuModSyncScreen(
-            DisconnectedScreen returnScreen,
+            Screen returnScreen,
             List<LimuModSyncManager.ModEntry> mods
     ) {
         super(Component.literal("Синхронизация модов Limu"));
@@ -31,7 +31,7 @@ final class LimuModSyncScreen extends Screen {
 
     static void showPrompt(
             Minecraft minecraft,
-            DisconnectedScreen returnScreen,
+            Screen returnScreen,
             LimuModSyncManager.SyncPlan plan
     ) {
         if (plan.missing().isEmpty()) {
