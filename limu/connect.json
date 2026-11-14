@@ -4,10 +4,10 @@
   "state": "connected",
   "connected": true,
   "server_running": true,
-  "address": "d-op3s6vhle6s-1.steam",
-  "generated_at": "2026-11-14T19:31:37Z",
-  "updated_at": "2026-11-14T19:31:37Z",
+  "address": "d-op3s7t3lkwk-1.steam",
+  "generated_at": "2026-11-14T20:36:41Z",
+  "updated_at": "2026-11-14T20:36:41Z",
   "minecraft_version": "1.21.1",
   "build": "PIZDA",
-  "message": "e4steam P2P transport is accepting authenticated peers"
+  "message": "MSI server is online; e4steam P2P transport is accepting authenticated peers"
 }
