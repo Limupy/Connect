@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "name": "Limu Minecraft",
-  "state": "offline",
+  "state": "starting",
   "connected": false,
-  "server_running": false,
+  "server_running": true,
   "address": "d-op3s2s7spp0-1.steam",
-  "generated_at": "2026-11-14T17:17:24Z",
-  "updated_at": "2026-11-14T17:17:24Z",
+  "generated_at": "2026-11-14T17:18:04Z",
+  "updated_at": "2026-11-14T17:18:04Z",
   "minecraft_version": "1.21.1",
   "build": "PIZDA",
-  "message": "Minecraft server is offline"
+  "message": "Waiting for current e4steam P2P readiness"
 }
