@@ -1,13 +1,14 @@
 {
-  "schema": 1,
-  "name": "Limu Minecraft",
-  "state": "connected",
-  "connected": true,
-  "server_running": true,
-  "address": "d-op3sfagw36c-1.steam",
-  "generated_at": "2026-11-14T22:52:18.022Z",
-  "updated_at": "2026-11-14T22:52:18.022Z",
-  "minecraft_version": "1.21.1",
-  "build": "PIZDA",
-  "message": "MSI server restarted; Minecraft world loaded and e4steam dedicated address published"
+    "schema":  1,
+    "name":  "Limu Minecraft",
+    "state":  "offline",
+    "connected":  false,
+    "server_running":  false,
+    "address":  null,
+    "generated_at":  "2026-11-14T22:52:18.022Z",
+    "updated_at":  "2026-11-15T12:11:44.079Z",
+    "last_seen":  null,
+    "minecraft_version":  "1.21.1",
+    "build":  "PIZDA",
+    "message":  "MSI Minecraft server is offline"
 }
