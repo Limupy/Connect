@@ -5,9 +5,9 @@
   "connected": true,
   "server_running": true,
   "address": "d-op3tulbjfgx-1.steam",
-  "generated_at": "2026-11-17T09:39:12.741Z",
-  "updated_at": "2026-11-17T09:39:12.741Z",
-  "last_seen": "2026-11-17T09:39:12.741Z",
+  "generated_at": "2026-11-17T09:44:19.880Z",
+  "updated_at": "2026-11-17T09:44:19.880Z",
+  "last_seen": "2026-11-17T09:44:19.880Z",
   "minecraft_version": "1.21.1",
   "build": "PIZDA",
   "message": "Ubuntu VM Limu server online; Minecraft listener and e4steam address are ready"
