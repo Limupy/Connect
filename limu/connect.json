@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "name": "Limu Minecraft",
-  "state": "offline",
-  "connected": false,
+  "state": "connected",
+  "connected": true,
   "server_running": true,
-  "address": null,
-  "generated_at": "2026-11-17T22:59:32.716Z",
-  "updated_at": "2026-11-17T23:03:38.521Z",
-  "last_seen": "2026-11-17T22:59:32.716Z",
+  "address": "d-op3tulbjfgx-1.steam",
+  "generated_at": "2026-11-18T00:00:42.301Z",
+  "updated_at": "2026-11-18T00:00:42.301Z",
+  "last_seen": "2026-11-18T00:00:42.301Z",
   "minecraft_version": "1.21.1",
   "build": "PIZDA",
-  "message": "Minecraft is running, but e4steam is not connected: Minecraft is running, but e4steam transport failed after startup"
+  "message": "Ubuntu VM Limu server online; Minecraft listener and e4steam address are ready"
 }
