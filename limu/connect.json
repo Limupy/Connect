@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "name": "Limu Minecraft",
-  "state": "offline",
-  "connected": false,
-  "server_running": false,
-  "address": null,
-  "generated_at": "2026-11-18T14:44:05.599Z",
-  "updated_at": "2026-11-18T14:45:09.173Z",
-  "last_seen": "2026-11-18T14:44:05.599Z",
+  "state": "connected",
+  "connected": true,
+  "server_running": true,
+  "address": "d-op3yehd6z2p-1.steam",
+  "generated_at": "2026-11-21T16:38:16.889Z",
+  "updated_at": "2026-11-21T16:38:16.889Z",
+  "last_seen": "2026-11-21T16:38:16.889Z",
   "minecraft_version": "1.21.1",
   "build": "PIZDA",
-  "message": "Ubuntu VM Limu Minecraft server is offline"
+  "message": "Ubuntu VM Limu server online; Minecraft listener and e4steam address are ready"
 }
